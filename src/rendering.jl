@@ -10,7 +10,7 @@ function AutoViz.render!(rendermodel::RenderModel, overlay::PretictionOverlay, s
     ego = scene[findfirst(1, scene)]
     for i=1:size(predictions)[1]
       pos = predictions[i,:]
-      ped = Vehicle(VehicleState(VecSE2(pos[1], pos[2], 1.57), 0.), VehicleDef(AutomotivePOMDPs.PEDESTRIAN_DEF), 1)
+      ped = Vehicle(VehicleState(VecSE2(pos[1], pos[2], 1.57), 0.), AutomotivePOMDPs.PEDESTRIAN_DEF, 1)
       add_instruction!(rendermodel, render_vehicle, (ego.state.posG.x+ped.state.posG.x+ego.def.length/2-AutomotivePOMDPs.PEDESTRIAN_DEF.width/2, ego.state.posG.y+ped.state.posG.y, ped.state.posG.θ, ped.def.length, ped.def.width, overlay.color))
     end
     return rendermodel
