@@ -46,10 +46,10 @@ end
 function AutomotiveDrivingModels.observe!(model::EmergencySystem, scene::Scene, roadway::Roadway, egoid::Int)
 
 
-    model.ego_vehicle = scene[findfirst(scene, egoid)]
+    model.ego_vehicle = scene[findfirst(egoid, scene)]
 
     for i=2:scene.n
-        object = scene[findfirst(scene, i)]
+        object = scene[findfirst(i, scene)]
         if ( collision_checker(model.ego_vehicle.state, object.state, model.ego_vehicle.def, object.def) == true )
             println("collision with object: ", i, " ego.state: ", model.ego_vehicle.state, " object.state: ", object.state)
         end
@@ -94,7 +94,7 @@ function AutomotiveDrivingModels.observe!(model::EmergencySystem, scene::Scene, 
                 (idx, ti) = get_conflict_zone(ego_data, object_data)
 
                 # calculate collision probability based on pedestrian prediction
-                (ttc, collision_rate, prediction) = caluclate_collision(ego_data, object_data, idx)
+                (ttc, collision_rate, prediction) = calculate_collision(ego_data, object_data, idx)
 
                 # for visualization, only consider critical objects 
                 if ( collision_rate > 0.2 )
@@ -166,7 +166,7 @@ return true if the ego car is in collision in the given scene, do not check for 
 other participants
 """
 function is_crash(scene::Scene)
-    ego = scene[findfirst(scene, 1)]
+    ego = scene[findfirst(1, scene)]
     @assert ego.id == 1
     if ego.state.v ≈ 0
         return false
@@ -267,7 +267,7 @@ function get_stop_distance_vehicle(model::EmergencySystem, delta_v::Float64, ax_
 @with_kw mutable struct Trajectory
     a::Float32 = 0
     phi_dot::Float64 = 0
-    X::Matrix{Float64} = Array{Float64}(0,9)
+    X::Matrix{Float64} = Array{Float64}(undef, 0,9)
 end
 
 
@@ -286,7 +286,7 @@ function caclulate_CTRA_prediction_simple(t0::Float64, x0::Float64, x_s::Float64
     trajectory.phi_dot = phi_dot;
 
     time = 0:TS:(T-TS)
-    X = Matrix(length(time), 9)
+    X = Matrix(undef, length(time), 9)
     x = [t0 x0 y0 phi0 v0 x_s y_s phi_s v_s]
     X[1,:] = x
 
@@ -305,11 +305,11 @@ function caclulate_CTRA_prediction_simple(t0::Float64, x0::Float64, x_s::Float64
 end
 
 """
-    caluclate_collision(object_1::Trajectory, object_2::Trajectory, critical_index::Int)
+    calculate_collision(object_1::Trajectory, object_2::Trajectory, critical_index::Int)
 Calculates for the object prediction the collision risk and the time to collision in the Frenet frame
 return: time to collision distribution, collision rate and predictions ot the object at the critical point
 """
-function caluclate_collision(object_1::Trajectory, object_2::Trajectory, critical_index::Int)
+function calculate_collision(object_1::Trajectory, object_2::Trajectory, critical_index::Int)
    
     time = object_1.X[:,1]
     ego_state_t0 = object_1.X[1,:]
@@ -365,8 +365,8 @@ function get_object_confidence_interval(x::Float64, x_sigma::Float64, y::Float64
     x_s = k*x_sigma;
     y_s = k*y_sigma;
     
-    # caluclation of the ellipse
-    theta_grid = linspace(0.0, 2*pi, 20)
+    # calculation of the ellipse
+    theta_grid = LinRange(0.0, 2*pi, 20)
 
     ellipse_x  = x_s * cos.(theta_grid);
     ellipse_y  = y_s * sin.(theta_grid)

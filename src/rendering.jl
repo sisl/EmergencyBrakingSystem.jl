@@ -7,7 +7,7 @@ end
 function AutoViz.render!(rendermodel::RenderModel, overlay::PretictionOverlay, scene::Scene, roadway::R) where R
 
     predictions = overlay.prediction
-    ego = scene[findfirst(scene, 1)]
+    ego = scene[findfirst(1, scene)]
     for i=1:size(predictions)[1]
       pos = predictions[i,:]
       ped = Vehicle(VehicleState(VecSE2(pos[1], pos[2], 1.57), 0.), VehicleDef(AutomotivePOMDPs.PEDESTRIAN_DEF), 1)
