@@ -50,12 +50,12 @@ end
     collision::Vector{Bool}
 end
 
-function AutomotiveDrivingModels.run_callback{S,D,I,R,M<:DriverModel}(
+function AutomotiveDrivingModels.run_callback(
         callback::ObservationCallback,
         rec::EntityQueueRecord{S,D,I},
         roadway::R,
         models::Dict{I,M},
-        tick::Int)
+        tick::Int) where {S,D,I,R,M<:DriverModel}
 
     push!(callback.ego_vehicle, models[1].ego_vehicle)
     push!(callback.risk, models[1].risk)

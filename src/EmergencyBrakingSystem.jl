@@ -1,8 +1,4 @@
-__precompile__()
-
 module EmergencyBrakingSystem
-
-
 
 using AutomotiveDrivingModels
 using AutoViz
