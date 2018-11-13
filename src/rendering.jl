@@ -7,10 +7,10 @@ end
 function AutoViz.render!(rendermodel::RenderModel, overlay::PretictionOverlay, scene::Scene, roadway::R) where R
 
     predictions = overlay.prediction
-    ego = scene[findfirst(scene, 1)]
+    ego = scene[findfirst(1, scene)]
     for i=1:size(predictions)[1]
       pos = predictions[i,:]
-      ped = Vehicle(VehicleState(VecSE2(pos[1], pos[2], 1.57), 0.), VehicleDef(AutomotivePOMDPs.PEDESTRIAN_DEF), 1)
+      ped = Vehicle(VehicleState(VecSE2(pos[1], pos[2], 1.57), 0.), AutomotivePOMDPs.PEDESTRIAN_DEF, 1)
       add_instruction!(rendermodel, render_vehicle, (ego.state.posG.x+ped.state.posG.x+ego.def.length/2-AutomotivePOMDPs.PEDESTRIAN_DEF.width/2, ego.state.posG.y+ped.state.posG.y, ped.state.posG.θ, ped.def.length, ped.def.width, overlay.color))
     end
     return rendermodel
@@ -50,12 +50,12 @@ end
     collision::Vector{Bool}
 end
 
-function AutomotiveDrivingModels.run_callback{S,D,I,R,M<:DriverModel}(
+function AutomotiveDrivingModels.run_callback(
         callback::ObservationCallback,
         rec::EntityQueueRecord{S,D,I},
         roadway::R,
         models::Dict{I,M},
-        tick::Int)
+        tick::Int) where {S,D,I,R,M<:DriverModel}
 
     push!(callback.ego_vehicle, models[1].ego_vehicle)
     push!(callback.risk, models[1].risk)

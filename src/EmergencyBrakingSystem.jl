@@ -1,9 +1,6 @@
-__precompile__()
-
 module EmergencyBrakingSystem
 
-
-
+using Random
 using AutomotiveDrivingModels
 using AutoViz
 using AutomotiveSensors

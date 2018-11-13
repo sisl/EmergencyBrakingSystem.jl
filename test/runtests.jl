@@ -1,8 +1,5 @@
-#using EmergencyBrakingSystem
-using Base.Test
-
-include("../src/EmergencyBrakingSystem.jl")
-
+using Test
+using EmergencyBrakingSystem
 using AutomotiveDrivingModels
 using AutoViz
 using AutomotiveSensors
