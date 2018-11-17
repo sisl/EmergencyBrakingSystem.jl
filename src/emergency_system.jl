@@ -83,7 +83,7 @@ function AutomotiveDrivingModels.observe!(model::EmergencySystem, scene::Scene, 
             delta_theta = object_posF.ϕ - model.ego_vehicle.state.posF.ϕ
 
             # object is only in front of the ego vehicle relevant
-            if (delta_s > 0)  
+            if (delta_s > 0 && model.ego_vehicle.state.v > 0.1)  
 
                 # in general, trajectory should come from a prediction model!!
                 # here a simple linear single track model is used! 
@@ -107,8 +107,8 @@ function AutomotiveDrivingModels.observe!(model::EmergencySystem, scene::Scene, 
                     model.ttc = ttc_m-2*ttc_std  # be safer
                     model.risk = min(ttb / model.ttc, 1.0)
 
-                 #   print(" collision_rate: ", model.collision_rate, " ttc_m: ", ttc_m, " ttc_std: ", ttc_std)
-                 #   println("Risk: ", model.risk, " ttc_min: ", model.ttc)
+                #   print(" collision_rate: ", model.collision_rate, " ttc_m: ", ttc_m, " ttc_std: ", ttc_std)
+                #   println("Risk: ", model.risk, " ttc_min: ", model.ttc)
                 end
 
                 # intervention necessary: time to react < threashold AND collision risk < threashold

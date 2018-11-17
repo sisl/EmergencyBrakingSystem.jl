@@ -55,8 +55,8 @@ function evaluate_scenario(ego_v, ped_v, ped_theta, obstacles, hitpoint, ped_rig
 
     pos_noise = 0.0
     vel_noise = 0.0
-    false_positive_rate = 0.05
-    false_negative_rate = 0.01
+    false_positive_rate = 0.0
+    false_negative_rate = 0.0
     rng = MersenneTwister(1);
     sensor = AutomotiveSensors.GaussianSensor(AutomotiveSensors.LinearNoise(10, pos_noise, 0.0), 
                      AutomotiveSensors.LinearNoise(10, vel_noise, 0.0), false_positive_rate, false_negative_rate, rng) 
