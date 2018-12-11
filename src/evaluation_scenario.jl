@@ -1,7 +1,55 @@
 
 
+function generate_scenario(scenario, ego_v, hit_point)
+    
+    ego_y = 0.0
+    ped_x = 50.0
+    ped_y = 0.0
+    
+    if scenario == "CPCN"
+        ped_v = 5/3.6
+        obstacles = [ConvexPolygon([VecE2(ped_x-VehicleDef().length-1, ped_y-2), 
+                VecE2(ped_x-VehicleDef().length-1, ped_y-2-VehicleDef().width), 
+                VecE2(ped_x-1, ped_y-2-VehicleDef().width), 
+                VecE2(ped_x-1, ped_y-2)],4)]
+        
+    elseif scenario == "CPAN25"
+        ped_v = 5 /3.6
+        obstacles = []   
+        
+    elseif scenario == "CPAN75"
+        ped_v = 5 /3.6
+        hit_point = hit_point + 50
+        obstacles = []    
+        
+    elseif scenario == "CPAF"
+        ped_v = 8 / 3.6
+        obstacles = []  
+        
+    else
+        ped_v = 5 / 3.6
+        obstacles = []
+    end
+    
+    # fix values
+    ped_right_side = true
+    ped_theta = 1.5707
+    ped_t_collision = 3.0
 
-function evaluate_scenario(ego_v, ped_v, ped_theta, obstacles, hitpoint, ped_right_side)
+    ped_y_end = VehicleDef().width * hit_point / 100 - VehicleDef().width/2
+    if (ped_right_side)
+        ped_y_start = ped_y_end - ped_t_collision * ped_v
+    else
+        ped_y_start = ped_y_end + ped_t_collision * ped_v
+    end
+    ped_y = ped_y_start
+    ego_x = ped_x - ego_v * ped_t_collision - VehicleDef().length/2;
+    println("Scenario: ", scenario, " v_ego=", ego_v*3.6, "km/h v_ped=", ped_v*3.6, "km/h HP=", hit_point)
+    return (ego_x, ego_y, ego_v, ped_x, ped_y, ped_v, ped_theta, obstacles)
+end
+
+
+function evaluate_scenario(ego_x, ego_y, ego_v, ped_x, ped_y, ped_v, ped_theta, obstacles)
 
     timestep = 0.05
 
@@ -17,20 +65,6 @@ function evaluate_scenario(ego_v, ped_v, ped_theta, obstacles, hitpoint, ped_rig
     env = CrosswalkEnv(params);
 
 
-    # fix values
-    ped_x = 50.0
-    ego_y = 0
-    ped_t_collision = 3.0
-
-    ped_y_offset_hitpoint = VehicleDef().width * hitpoint / 100 - VehicleDef().width/2
-    ped_y_end = ped_y_offset_hitpoint
-    if (ped_right_side)
-        ped_y_start = ped_y_end - ped_t_collision * ped_v
-    else
-        ped_y_start = ped_y_end + ped_t_collision * ped_v
-    end
-    ego_x = ped_x - ego_v * ped_t_collision - VehicleDef().length/2;
-
     ego_id = 1
     ped_id = 2
     ped2_id = 3
@@ -41,7 +75,7 @@ function evaluate_scenario(ego_v, ped_v, ped_theta, obstacles, hitpoint, ped_rig
     ego = Vehicle(ego_initial_state, VehicleDef(), ego_id)
 
     # Pedestrian definition using our new Vehicle definition
-    ped_initial_state = VehicleState(VecSE2(ped_x,ped_y_start,ped_theta), env.crosswalk, env.roadway, ped_v)
+    ped_initial_state = VehicleState(VecSE2(ped_x, ped_y, ped_theta), env.crosswalk, env.roadway, ped_v)
     ped = Vehicle(ped_initial_state, AutomotivePOMDPs.PEDESTRIAN_DEF, ped_id)
 
     ped2 = Vehicle(VehicleState(VecSE2(40., 3., -1.57), env.crosswalk, env.roadway, 0.), AutomotivePOMDPs.PEDESTRIAN_DEF, ped2_id)
@@ -70,7 +104,7 @@ function evaluate_scenario(ego_v, ped_v, ped_theta, obstacles, hitpoint, ped_rig
         obstacles=env.obstacles, 
         SAFETY_DISTANCE_LON=1.0,
         AX_MAX=-10.0,
-        THRESHOLD_COLLISION_RATE = 0.6,
+        THRESHOLD_COLLISION_RATE = 0.5,
         THRESHOLD_TIME_TO_REACT = 0.99,    
         timestep=timestep)
 
