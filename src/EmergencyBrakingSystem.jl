@@ -11,7 +11,9 @@ using Reel
 
 
 export 
-    EmergencySystem
+    EmergencySystem,
+    generate_scenario,
+    evaluateScenarioMetric
 
 include("rendering.jl")
 include("evaluation_scenario.jl")

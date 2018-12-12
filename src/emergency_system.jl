@@ -27,7 +27,7 @@
     THRESHOLD_TIME_TO_REACT::Float64 = 0.99
 
     TS_BREAK::Float64 = 0.2
-    TD_BREAK::Float64 = 0.2
+    TD_BREAK::Float64 = 0.4
     AX_MAX::Float64 = -10.0
     SAFETY_DISTANCE_LON::Float64 = 1.0
 

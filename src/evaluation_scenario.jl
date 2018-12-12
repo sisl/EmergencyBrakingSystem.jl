@@ -123,11 +123,46 @@ function evaluate_scenario(ego_x, ego_y, ego_v, ped_x, ped_y, ped_v, ped_theta, 
     collision = Bool[]
     sensor_observations = [Vehicle[]]
     ego_vehicle = Vehicle[]
+    ego_a = Float64[]
 
-    obs_callback = (EmergencyBrakingSystem.ObservationCallback(ego_vehicle, risk, collision_rate, ttc, brake_request, prediction, sensor_observations, collision),)
+    obs_callback = (EmergencyBrakingSystem.ObservationCallback(ego_vehicle, risk, collision_rate, ttc, brake_request, prediction, sensor_observations, collision, ego_a),)
 
     simulate!(rec, scene, env.roadway, models, nticks, obs_callback)
 
-    return (rec, timestep, env, ego_vehicle, sensor, sensor_observations, risk, ttc, collision_rate, brake_request, prediction, collision)
+    return (rec, timestep, env, ego_vehicle, sensor, sensor_observations, risk, ttc, collision_rate, brake_request, prediction, collision, ego_a)
 
+end
+
+function evaluateScenarioMetric(ego_vehicle, ego_a, collision)
+
+    collision = false
+    dv_collision = 0.
+    
+    v = []
+    a = []
+    a_jerk = 0.
+    a_last = 0.
+    for i=1:length(ego_vehicle)
+        if (ego_vehicle[i].state.v > 0)
+            push!(v,ego_vehicle[i].state.v)
+        end
+         if (ego_a[i] != 0.)
+            push!(a,ego_a[i])
+        end   
+        
+        if ( a_last != ego_a[i] )
+            a_jerk = a_jerk + abs(ego_a[i] - a_last) 
+        end
+        a_last = ego_a[i]
+    end
+    v_mean = mean(v)
+    a_mean = mean(a)
+    a_min = minimum(a)
+    
+    if (collision[end])
+        collision = true
+        dv_collision = ego_vehicle[end].state.v
+    end
+    
+    return (collision, dv_collision, v_mean, a_mean, a_jerk, a_min)
 end

@@ -48,6 +48,7 @@ end
     prediction::Vector{Array{Float64}}
     sensor_observations::Vector{Vector{Vehicle}}
     collision::Vector{Bool}
+    a::Vector{Float64}
 end
 
 function AutomotiveDrivingModels.run_callback(
@@ -64,6 +65,7 @@ function AutomotiveDrivingModels.run_callback(
     push!(callback.brake_request, models[1].brake_request)
     push!(callback.prediction, models[1].prediction)
     push!(callback.sensor_observations, models[1].sensor_observations)
+    push!(callback.a, models[1].a_current)
 
     collision = is_crash(rec[0])
     push!(callback.collision, collision)
