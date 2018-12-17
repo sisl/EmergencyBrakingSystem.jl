@@ -7,6 +7,7 @@ function generate_scenario(scenario, ego_v, hit_point)
     ped_y = 0.0
     
     if scenario == "CPCN"
+        scenario_id = 1
         ped_v = 5/3.6
         obstacles = [ConvexPolygon([VecE2(ped_x-VehicleDef().length-1, ped_y-2), 
                 VecE2(ped_x-VehicleDef().length-1, ped_y-2-VehicleDef().width), 
@@ -14,19 +15,23 @@ function generate_scenario(scenario, ego_v, hit_point)
                 VecE2(ped_x-1, ped_y-2)],4)]
         
     elseif scenario == "CPAN25"
+        scenario_id = 2
         ped_v = 5 /3.6
         obstacles = []   
         
     elseif scenario == "CPAN75"
+        scenario_id = 3
         ped_v = 5 /3.6
         hit_point = hit_point + 50
         obstacles = []    
         
-    elseif scenario == "CPAF"
+    elseif scenario == "CPFA"
+        scenario_id = 4
         ped_v = 8 / 3.6
-        obstacles = []  
-        
+        obstacles = [] 
+         
     else
+        scenario_id = -1
         ped_v = 5 / 3.6
         obstacles = []
     end
@@ -44,8 +49,8 @@ function generate_scenario(scenario, ego_v, hit_point)
     end
     ped_y = ped_y_start
     ego_x = ped_x - ego_v * ped_t_collision - VehicleDef().length/2;
-    println("Scenario: ", scenario, " v_ego=", ego_v*3.6, "km/h v_ped=", ped_v*3.6, "km/h HP=", hit_point)
-    return (ego_x, ego_y, ego_v, ped_x, ped_y, ped_v, ped_theta, obstacles)
+    #println("Scenario: ", scenario, " v_ego=", ego_v*3.6, "km/h v_ped=", ped_v*3.6, "km/h HP=", hit_point, " ped_y: ", ped_y)
+    return (ego_x, ego_y, ego_v, ped_x, ped_y, ped_v, ped_theta, obstacles, scenario_id)
 end
 
 
@@ -112,29 +117,30 @@ function evaluate_scenario(ego_x, ego_y, ego_v, ped_x, ped_y, ped_v, ped_theta, 
     models[ped2_id] = ConstantPedestrian(v_desired=0.0, dawdling_amp=0.05) # dumb model
     models[ped3_id] = ConstantPedestrian(v_desired=1.0, dawdling_amp=0.05) # dumb model
 
-    nticks = 80
+    nticks = 100
     rec = SceneRecord(nticks+1, timestep)
 
     risk = Float64[]
     collision_rate = Float64[]
     ttc = Float64[]
-    brake_request = Bool[]
+    emergency_brake_request = Bool[]
     prediction = Vector{Array{Float64}}()
     collision = Bool[]
     sensor_observations = [Vehicle[]]
     ego_vehicle = Vehicle[]
     ego_a = Float64[]
 
-    obs_callback = (EmergencyBrakingSystem.ObservationCallback(ego_vehicle, risk, collision_rate, ttc, brake_request, prediction, sensor_observations, collision, ego_a),)
+    obs_callback = (EmergencyBrakingSystem.ObservationCallback(ego_vehicle, risk, collision_rate, ttc, emergency_brake_request, prediction, sensor_observations, collision, ego_a),)
 
     simulate!(rec, scene, env.roadway, models, nticks, obs_callback)
 
-    return (rec, timestep, env, ego_vehicle, sensor, sensor_observations, risk, ttc, collision_rate, brake_request, prediction, collision, ego_a)
+    return (rec, timestep, env, ego_vehicle, sensor, sensor_observations, risk, ttc, collision_rate, emergency_brake_request, prediction, collision, ego_a)
 
 end
 
-function evaluateScenarioMetric(ego_vehicle, ego_a, collision)
+function evaluateScenarioMetric(ego_vehicle, emergency_brake_request, ego_a, collision_vector)
 
+    emergency_brake_intervention = false
     collision = false
     dv_collision = 0.
     
@@ -154,15 +160,25 @@ function evaluateScenarioMetric(ego_vehicle, ego_a, collision)
             a_jerk = a_jerk + abs(ego_a[i] - a_last) 
         end
         a_last = ego_a[i]
+
+        if emergency_brake_request[i] == 1  
+            emergency_brake_intervention = true
+        end
+        
     end
     v_mean = mean(v)
-    a_mean = mean(a)
-    a_min = minimum(a)
+    if ( length(a) > 0)
+        a_mean = mean(a)
+        a_min = minimum(a)
+    else
+        a_mean = 0.
+        a_min = 0.
+    end
     
-    if (collision[end])
+    if (collision_vector[end] == true)
         collision = true
         dv_collision = ego_vehicle[end].state.v
     end
     
-    return (collision, dv_collision, v_mean, a_mean, a_jerk, a_min)
+    return (collision, emergency_brake_intervention, dv_collision, v_mean, a_mean, a_jerk, a_min)
 end
