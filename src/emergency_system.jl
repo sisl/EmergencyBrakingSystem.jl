@@ -1,20 +1,24 @@
 
 
 @with_kw mutable struct EmergencySystem <: DriverModel{LatLonAccel}
+    
+    timestep::Float64 = 0.05
+    t_current::Float64 = 0
+    tick::Int64 = 0
+
+
+    ego_vehicle::Vehicle = Vehicle(VehicleState(VecSE2(0., 0., 0.), 0.), VehicleDef(), 1)
     a::LatLonAccel = LatLonAccel(0.0, 0)
+
     env::CrosswalkEnv = CrosswalkEnv(CrosswalkParams())
     sensor::AutomotiveSensors.GaussianSensor = AutomotiveSensors.GaussianSensor(AutomotiveSensors.LinearNoise(10, 0., 0.), 
                                                                AutomotiveSensors.LinearNoise(10, 0., 0.), 0, 0, MersenneTwister(1)) 
 
-    ego_vehicle::Vehicle = Vehicle(VehicleState(VecSE2(0., 0., 0.), 0.), VehicleDef(), 1)
-    
-    timestep::Float64 = 0.05
+    sensor_observations::Vector{Vehicle} = []
 
-    t_current::Float64 = 0
-    tick::Int64 = 0
     update_tick_emergency_system::Int64 = 1
 
-    state::Int32 = 0
+    state_brake_system::Int32 = 0
 
     a_request::Float64 = 0
     a_current::Float64 = 0
@@ -37,8 +41,7 @@
     ttc::Float64 = 0.0
 
     obstacles::Vector{ConvexPolygon}
-    prediction::Array{Float64} = []
-    sensor_observations::Vector{Vehicle} = []
+    prediction_obstacle::Array{Float64} = []
 
 end
 
@@ -47,14 +50,12 @@ function AutomotiveDrivingModels.observe!(model::EmergencySystem, scene::Scene, 
 
 
     model.ego_vehicle = scene[findfirst(egoid, scene)]
-
     for i=2:scene.n
         object = scene[findfirst(i, scene)]
         if ( collision_checker(model.ego_vehicle.state, object.state, model.ego_vehicle.def, object.def) == true )
             println("collision with object: ", i, " ego.state: ", model.ego_vehicle.state, " object.state: ", object.state)
         end
     end
-
 
     model.sensor_observations = measure(model.sensor, model.ego_vehicle, scene, roadway, model.obstacles)
     
@@ -64,7 +65,7 @@ function AutomotiveDrivingModels.observe!(model::EmergencySystem, scene::Scene, 
     model.risk = 0
     model.collision_rate = 0
     model.brake_request = false
-    model.prediction = []
+    model.prediction_obstacle = []
 
     emergency_system_brake_request = false
 
@@ -94,12 +95,12 @@ function AutomotiveDrivingModels.observe!(model::EmergencySystem, scene::Scene, 
                 (idx, ti) = get_conflict_zone(ego_data, object_data)
 
                 # calculate collision probability based on pedestrian prediction
-                (ttc, collision_rate, prediction) = calculate_collision(ego_data, object_data, idx)
+                (ttc, collision_rate, prediction_obstacle) = calculate_collision(ego_data, object_data, idx)
 
                 # for visualization, only consider critical objects 
                 if ( collision_rate > 0.2 )
                     model.collision_rate = collision_rate
-                    model.prediction = prediction
+                    model.prediction_obstacle = prediction_obstacle
  
                     ttc_m = mean(ttc)
                     ttc_std = std(ttc)
@@ -118,13 +119,11 @@ function AutomotiveDrivingModels.observe!(model::EmergencySystem, scene::Scene, 
             end
         end
 
-
         if ( emergency_system_brake_request == true )
             model.brake_request = true
         else
             model.brake_request = false
         end
-        
     end
     
     # state machine for the brake system (limitation of required deceleration request)
@@ -189,47 +188,47 @@ function brake_system_state_machine(model::EmergencySystem, ego::VehicleState)
     
 
     if model.brake_release == true
-        model.state = 0
+        model.state_brake_system = 0
     end
 
-    if model.state == 0 
+    if model.state_brake_system == 0 
         #println("standby")
         model.a_current = 0
         if ( model.brake_request == true )
-            model.state = 1
+            model.state_brake_system = 1
         end
     end
     
-    if model.state == 1
+    if model.state_brake_system == 1
         #println("brake_request")
         model.a_current = 0
         model.a_request = model.AX_MAX
         model.t_brake_trigger = model.t_current + model.TD_BREAK
-        model.state = 2
+        model.state_brake_system = 2
     end
     
-    if model.state == 2
+    if model.state_brake_system == 2
         #println("brake_delay")
         model.a_current = 0
         if (model.t_current >= model.t_brake_trigger)
-          model.state = 3    
+          model.state_brake_system = 3    
         end
     end
     
-    if model.state == 3
+    if model.state_brake_system == 3
         #println("brake_ramp")
         model.a_current = model.a_current - 50 * model.timestep 
         if ( model.a_request >=  model.a_current )
-            model.state = 4
+            model.state_brake_system = 4
         end
     end
-    if model.state == 4
+    if model.state_brake_system == 4
         #println("brake_max")
         if (ego.v > 0)
             model.a_current = model.a_request
         else
             model.a_current = 0.0
-            model.state = 0
+            model.state_brake_system = 0
         end
     end
 

@@ -120,21 +120,23 @@ function evaluate_scenario(ego_x, ego_y, ego_v, ped_x, ped_y, ped_v, ped_theta, 
     nticks = 100
     rec = SceneRecord(nticks+1, timestep)
 
-    risk = Float64[]
-    collision_rate = Float64[]
-    ttc = Float64[]
-    emergency_brake_request = Bool[]
-    prediction = Vector{Array{Float64}}()
-    collision = Bool[]
     sensor_observations = [Vehicle[]]
     ego_vehicle = Vehicle[]
     ego_a = Float64[]
+    collision = Bool[]
 
-    obs_callback = (EmergencyBrakingSystem.ObservationCallback(ego_vehicle, risk, collision_rate, ttc, emergency_brake_request, prediction, sensor_observations, collision, ego_a),)
+    collision_rate = Float64[]  # not used
+    ttc = Float64[]             # not used
+    risk = Float64[]
+    emergency_brake_request = Bool[]      # not used
+    prediction_obstacle = Vector{Array{Float64}}()  # not used
+
+
+    obs_callback = (EmergencyBrakingSystem.ObservationCallback(sensor_observations, ego_vehicle, ego_a, collision, collision_rate, ttc, risk, emergency_brake_request, prediction_obstacle),)
 
     simulate!(rec, scene, env.roadway, models, nticks, obs_callback)
 
-    return (rec, timestep, env, ego_vehicle, sensor, sensor_observations, risk, ttc, collision_rate, emergency_brake_request, prediction, collision, ego_a)
+    return (rec, timestep, env, sensor, sensor_observations, ego_vehicle, ego_a, collision, collision_rate, ttc, risk, emergency_brake_request, prediction_obstacle)
 
 end
 
@@ -161,7 +163,7 @@ function evaluateScenarioMetric(ego_vehicle, emergency_brake_request, ego_a, col
         end
         a_last = ego_a[i]
 
-        if emergency_brake_request[i] == 1  
+        if length(emergency_brake_request) > 0 && emergency_brake_request[i] == 1  
             emergency_brake_intervention = true
         end
         

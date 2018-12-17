@@ -39,16 +39,20 @@ function animate_record(rec::SceneRecord,dt::Float64, env::CrosswalkEnv, ego_veh
     return duration, fps, render_rec
 end
 
+
 @with_kw mutable struct ObservationCallback
+
+    sensor_observations::Vector{Vector{Vehicle}}
     ego_vehicle::Vector{Vehicle}
-    risk::Vector{Float64}
+    ego_a::Vector{Float64}
+    collision::Vector{Bool}
+
     collision_rate::Vector{Float64}
     ttc::Vector{Float64}
+    risk::Vector{Float64}
     brake_request::Vector{Bool}
-    prediction::Vector{Array{Float64}}
-    sensor_observations::Vector{Vector{Vehicle}}
-    collision::Vector{Bool}
-    a::Vector{Float64}
+    prediction_obstacle::Vector{Array{Float64}}
+
 end
 
 function AutomotiveDrivingModels.run_callback(
@@ -58,17 +62,17 @@ function AutomotiveDrivingModels.run_callback(
         models::Dict{I,M},
         tick::Int) where {S,D,I,R,M<:DriverModel}
 
-    push!(callback.ego_vehicle, models[1].ego_vehicle)
-    push!(callback.risk, models[1].risk)
-    push!(callback.collision_rate, models[1].collision_rate)
-    push!(callback.ttc, models[1].ttc)
-    push!(callback.brake_request, models[1].brake_request)
-    push!(callback.prediction, models[1].prediction)
     push!(callback.sensor_observations, models[1].sensor_observations)
-    push!(callback.a, models[1].a_current)
-
+    push!(callback.ego_vehicle, models[1].ego_vehicle)
+    push!(callback.ego_a, models[1].a_current)
     collision = is_crash(rec[0])
     push!(callback.collision, collision)
+
+    push!(callback.collision_rate, models[1].collision_rate)
+    push!(callback.ttc, models[1].ttc)
+    push!(callback.risk, models[1].risk)
+    push!(callback.brake_request, models[1].brake_request)
+    push!(callback.prediction_obstacle, models[1].prediction_obstacle)
 
     return collision
 end
