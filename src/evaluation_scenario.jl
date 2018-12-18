@@ -154,7 +154,8 @@ function evaluateScenarioMetric(ego_vehicle, emergency_brake_request, ego_a, col
         if (ego_vehicle[i].state.v > 0)
             push!(v,ego_vehicle[i].state.v)
         end
-         if (ego_a[i] != 0.)
+
+        if (ego_a[i] != 0. && ego_a[i] < 0.)
             push!(a,ego_a[i])
         end   
         
