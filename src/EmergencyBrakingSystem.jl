@@ -13,7 +13,8 @@ using Reel
 export 
     EmergencySystem,
     generate_scenario,
-    evaluateScenarioMetric
+    evaluateScenarioMetric,
+    evaluateScenariosMetric
 
 include("rendering.jl")
 include("evaluation_scenario.jl")

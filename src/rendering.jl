@@ -32,7 +32,7 @@ function animate_record(rec::SceneRecord,dt::Float64, env::CrosswalkEnv, ego_veh
         sensor_overlay = GaussianSensorOverlay(sensor=sensor, o=sensor_o[frame_index])
         occlusion_overlay = OcclusionOverlay(obstacles=env.obstacles)
         prediction_overlay = PretictionOverlay(prediction=prediction[frame_index])
-        text_overlay = TextOverlay(text=text_to_visualize,pos=VecE2(20.,10.),incameraframe=true,color=colorant"white",font_size=15)
+        text_overlay = TextOverlay(text=text_to_visualize,pos=VecE2(60.,10.),incameraframe=true,color=colorant"white",font_size=15)
         return render(rec[frame_index-nframes(rec)], env, [prediction_overlay, sensor_overlay, occlusion_overlay, text_overlay, IDOverlay()], cam=cam)
 
     end

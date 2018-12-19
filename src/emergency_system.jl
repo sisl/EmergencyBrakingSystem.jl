@@ -15,6 +15,7 @@
                                                                AutomotiveSensors.LinearNoise(10, 0., 0.), 0, 0, MersenneTwister(1)) 
 
     sensor_observations::Vector{Vehicle} = []
+    objects_tracked = Dict{Int64, Float64}()
 
     update_tick_emergency_system::Int64 = 1
 
@@ -27,7 +28,7 @@
     brake_request::Bool = false
     brake_release::Bool = false
 
-    THRESHOLD_COLLISION_RATE::Float64 = 0.6
+    THRESHOLD_COLLISION_RATE::Float64 = 0.5
     THRESHOLD_TIME_TO_REACT::Float64 = 0.99
 
     TS_BREAK::Float64 = 0.2
@@ -45,7 +46,7 @@
 
 end
 
-  
+
 function AutomotiveDrivingModels.observe!(model::EmergencySystem, scene::Scene, roadway::Roadway, egoid::Int)
 
 
@@ -58,7 +59,11 @@ function AutomotiveDrivingModels.observe!(model::EmergencySystem, scene::Scene, 
     end
 
     model.sensor_observations = measure(model.sensor, model.ego_vehicle, scene, roadway, model.obstacles)
-    
+
+    # add sensor delay 0.2s
+    model.sensor_observations = objects_time_delay(model)
+
+   # println(model.sensor_observations)
     ################ Emergency System #####################################################
     (ttb, stop_distance) = get_stop_distance_vehicle(model, model.ego_vehicle.state.v, 10.0, 1.0)
     
@@ -76,7 +81,7 @@ function AutomotiveDrivingModels.observe!(model::EmergencySystem, scene::Scene, 
 
         # calculate for every observation the risk
         for object in model.sensor_observations
-
+        
             # calculation of the object data in the Frenet frame
             object_posF = Frenet(proj(object.state.posG, get_lane(model.env.roadway, model.ego_vehicle.state), model.env.roadway, move_along_curves=false),model.env.roadway)
             delta_s = object_posF.s - model.ego_vehicle.state.posF.s - model.ego_vehicle.def.length/2
@@ -375,7 +380,7 @@ function get_object_confidence_interval(x::Float64, x_sigma::Float64, y::Float64
     y_s = k*y_sigma;
     
     # calculation of the ellipse
-    theta_grid = LinRange(0.0, 2*pi, 20)
+    theta_grid = LinRange(0.0, 2*pi, 40)
 
     ellipse_x  = x_s * cos.(theta_grid);
     ellipse_y  = y_s * sin.(theta_grid)
@@ -407,3 +412,33 @@ function get_conflict_zone(object_1::Trajectory, object_2::Trajectory)
     end
     return min_di_idx, time[min_di_idx]
 end
+
+
+function objects_time_delay(model::EmergencySystem)
+    
+    objects_tracked = Vehicle[]
+
+    for object in model.sensor_observations
+
+	    if haskey(model.objects_tracked, object.id) == false   # new object
+            model.objects_tracked[object.id] = model.t_current + 0.0
+            #println(model.objects_tracked)
+        else
+	        if ( model.t_current >= model.objects_tracked[object.id] )   # how long is the object already visible
+                model.objects_tracked[object.id] = model.t_current
+                push!(objects_tracked, object)
+            end
+        end
+    end
+
+    # delete objects if they are older than 0.2s, because if object occurs again, the tracker needs again some time
+    for oid in keys(model.objects_tracked)
+        if ( model.objects_tracked[oid] < model.t_current - 0.2 )
+            delete!(model.objects_tracked, oid)
+        end
+    end
+
+    model.sensor_observations = deepcopy(objects_tracked)
+    return model.sensor_observations
+end
+
