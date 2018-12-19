@@ -421,7 +421,7 @@ function objects_time_delay(model::EmergencySystem)
     for object in model.sensor_observations
 
 	    if haskey(model.objects_tracked, object.id) == false   # new object
-            model.objects_tracked[object.id] = model.t_current + 0.0
+            model.objects_tracked[object.id] = model.t_current + 0.2
             #println(model.objects_tracked)
         else
 	        if ( model.t_current >= model.objects_tracked[object.id] )   # how long is the object already visible
