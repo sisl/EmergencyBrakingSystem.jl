@@ -218,7 +218,11 @@ function brake_system_state_machine(model::EmergencySystem, ego::VehicleState)
         #println("brake_request")
         model.a_current = 0
         model.a_request = model.AX_MAX
-        model.t_brake_trigger = model.t_current + model.TD_BREAK
+        if ( model.a > -0.5)    # no break delay if brake system is already active
+            model.t_brake_trigger = model.t_current + model.TD_BREAK
+        else
+            model.t_brake_trigger = model.t_current
+        end
         model.state_brake_system = 2
     end
     
@@ -265,8 +269,12 @@ function get_stop_distance_vehicle(model::EmergencySystem, delta_v::Float64, ax_
     s_s = v_s *  model.TS_BREAK;                    # distance during ramp up phase
     s_v = (v_s * v_s) / (2 * a);                    # distance to stop with full acceleration
 
-    distance_to_stop = model.TD_BREAK * delta_v + s_s + s_v;
-    distance_to_stop = distance_to_stop + model.SAFETY_DISTANCE_LON
+    if ( model.a.a_lon < -2. )
+        distance_to_stop = s_v + model.SAFETY_DISTANCE_LON
+    else
+        distance_to_stop = model.TD_BREAK * delta_v + s_s + s_v;
+        distance_to_stop = distance_to_stop + model.SAFETY_DISTANCE_LON
+    end
 
     if ( distance_to_stop < 0.0) 
         distance_to_stop = 0
