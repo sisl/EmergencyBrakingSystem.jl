@@ -218,7 +218,7 @@ function brake_system_state_machine(model::EmergencySystem, ego::VehicleState)
         #println("brake_request")
         model.a_current = 0
         model.a_request = model.AX_MAX
-        if ( model.a > -0.5)    # no break delay if brake system is already active
+        if ( model.a.a_lon > -0.5)    # no break delay if brake system is already active
             model.t_brake_trigger = model.t_current + model.TD_BREAK
         else
             model.t_brake_trigger = model.t_current
