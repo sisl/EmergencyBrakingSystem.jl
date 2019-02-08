@@ -1,3 +1,5 @@
+# detailed documentation follows soon ...
+
 # EmergencyBrakingSystem
 
 [![Build Status](https://travis-ci.org/sisl/EmergencyBrakingSystem.jl.svg?branch=master)](https://travis-ci.org/sisl/EmergencyBrakingSystem.jl)
