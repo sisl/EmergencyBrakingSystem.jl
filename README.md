@@ -11,7 +11,8 @@ contact: Markus Schratter, [m.schratter@gmx.at](m.schratter@gmx.at) Maxime Bouto
 
 
 ## CPAN25 50km/h
-![](docs/CPAN25_50kmh_emergency_brake_intervention.gif){:width="30%"}
+![](docs/CPAN25_50kmh_emergency_brake_intervention.gif)
+<img src="docs/CPAN25_50kmh_emergency_brake_intervention.gif" width="30%">
 
 
 ## False Positive Test
