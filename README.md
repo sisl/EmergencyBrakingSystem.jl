@@ -11,13 +11,12 @@ contact: Markus Schratter, [m.schratter@gmx.at](m.schratter@gmx.at) Maxime Bouto
 
 
 ## CPAN25 50km/h
-A pedestrian corsses the road, but there is no brake intervention required.
-![](docs/CPAN25_50kmh_emergency_brake_intervention.gif)
+![](docs/CPAN25_50kmh_emergency_brake_intervention.gif){:width="30%"}
 
 
 ## False Positive Test
-A pedestrian corsses the road, but there is no brake intervention required.
 ![](docs/CPAN25_50kmh_FP_test.gif)
+A pedestrian corsses the road, but there is no brake intervention required.
 
 ## Installation
 
