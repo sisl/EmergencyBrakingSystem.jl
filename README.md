@@ -10,6 +10,14 @@
 contact: Markus Schratter, [m.schratter@gmx.at](m.schratter@gmx.at) Maxime Bouton, [boutonm@stanford.edu](boutonm@stanford.edu)
 
 
+## CPAN25 50km/h
+A pedestrian corsses the road, but there is no brake intervention required.
+![](docs/CPAN25_50kmh_emergency_brake_intervention.gif)
+
+
+## False Positive Test
+A pedestrian corsses the road, but there is no brake intervention required.
+![](docs/CPAN25_50kmh_FP_test.gif)
 
 ## Installation
 
