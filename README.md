@@ -11,12 +11,11 @@ contact: Markus Schratter, [m.schratter@gmx.at](m.schratter@gmx.at) Maxime Bouto
 
 
 ## CPAN25 50km/h
-![](docs/CPAN25_50kmh_emergency_brake_intervention.gif)
-<img src="docs/CPAN25_50kmh_emergency_brake_intervention.gif" width="30%">
+<img src="docs/CPAN25_50kmh_emergency_brake_intervention.gif" width="70%">
 
 
 ## False Positive Test
-![](docs/CPAN25_50kmh_FP_test.gif)
+<img src="docs/CPAN25_50kmh_FP_test.gif" width="70%">
 A pedestrian corsses the road, but there is no brake intervention required.
 
 ## Installation
