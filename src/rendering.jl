@@ -25,14 +25,14 @@ function animate_record(rec::SceneRecord,dt::Float64, env::CrosswalkEnv, ego_veh
 
     function render_rec(t, dt)
         frame_index = Int(floor(t/dt)) + 1
-        text_to_visualize = [string("v-ego: ", ego_vehicle[frame_index].state.v*3.6, " km/h", " TTC: ", ttc[frame_index], 
-                                " Collision rate: ",  collision_rate[frame_index], " Risk: ",  risk[frame_index], 
+        text_to_visualize = [string("v-ego: ", round(ego_vehicle[frame_index].state.v*3.6,digits=1), "km/h", " TTC: ", round(ttc[frame_index],digits=1), "s", 
+                                " Collision: ",  collision_rate[frame_index], " Risk: ",  round(risk[frame_index],digits=1), 
                                 " Brake request: ",  brake_request[frame_index])]
        
         sensor_overlay = GaussianSensorOverlay(sensor=sensor, o=sensor_o[frame_index])
         occlusion_overlay = OcclusionOverlay(obstacles=env.obstacles)
         prediction_overlay = PretictionOverlay(prediction=prediction[frame_index])
-        text_overlay = TextOverlay(text=text_to_visualize,pos=VecE2(60.,10.),incameraframe=true,color=colorant"white",font_size=15)
+        text_overlay = TextOverlay(text=text_to_visualize,pos=VecE2(75.,8.),incameraframe=true,color=colorant"white",font_size=20)
         return render(rec[frame_index-nframes(rec)], env, [prediction_overlay, sensor_overlay, occlusion_overlay, text_overlay, IDOverlay()], cam=cam)
 
     end
