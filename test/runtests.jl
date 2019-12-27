@@ -7,8 +7,11 @@ using AutomotivePOMDPs
 using Parameters
 using StaticArrays
 using Reel
+using Random
 
 @testset "EmergencyBrakingSystem.jl" begin
+
+Random.seed!(1)
 
 ped_v = 5.0 / 3.6
 ped_theta = π/2
@@ -27,6 +30,7 @@ obstacles = [obstacle_1]
 
 # unavoidable situation
 ego_v = 50.0 / 3.6
+ped_v = 0.0
 ego_x = ped_x - ego_v * ped_t_collision - VehicleDef().length/2;
 (scenes, timestep, env, ego_vehicle, sensor, sensor_observations, risk, ttc, collision_rate, brake_request, prediction, collision) = EmergencyBrakingSystem.evaluate_scenario(ego_x, ego_y, ego_v, ped_x, ped_y, ped_v, ped_theta, obstacles);
 @test collision[end] == true
