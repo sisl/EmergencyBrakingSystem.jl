@@ -1,7 +1,7 @@
 name = "EmergencyBrakingSystem"
 uuid = "3f59e4f0-e69d-11e8-310d-15d6353296e9"
 repo = "https://github.com/sisl/EmergencyBrakingSystem.jl"
-version = "0.0.0"
+version = "0.1.0"
 
 [deps]
 AutoUrban = "1385418a-9289-5a49-ab93-843b508de4cb"
