@@ -29,20 +29,6 @@ Pkg.Registry.add("https://github.com/sisl/Registry") # add sisl registry
 Pkg.add("https://github.com/sisl/EmergencyBrakingSystem.jl") # install the package and its dependencies
 ```
 
-Alternatively, you could add all the dependencies manually (not recommended):
-```julia
-using Pkg
-Pkg.add(PackageSpec(url="https://github.com/sisl/Vec.jl"))
-Pkg.add(PackageSpec(url="https://github.com/sisl/Records.jl"))
-Pkg.add(PackageSpec(url="https://github.com/sisl/AutomotiveDrivingModels.jl"))
-Pkg.add(PackageSpec(url="https://github.com/sisl/AutoViz.jl"))
-Pkg.add(PackageSpec(url="https://github.com/sisl/AutomotiveSensors.jl"))
-Pkg.add(PackageSpec(url="https://github.com/sisl/AutoUrban.jl"))
-Pkg.add(PackageSpec(url="https://github.com/JuliaPOMDP/RLInterface.jl"))
-Pkg.add(PackageSpec(url="https://github.com/sisl/AutomotivePOMDPs"))
-Pkg.add(PackageSpec(url="https://github.com/sisl/EmergencyBrakingSystem.jl"))
-```
-
 ## Code to run
 
 Run `test.ipynb` for a visualization of the different scenarios.
