@@ -1,10 +1,10 @@
 
-@with_kw struct PretictionOverlay <: SceneOverlay
+@with_kw struct PredictionOverlay <: SceneOverlay
     prediction::Array{Float64} = Array{Float64}()
     color::Colorant = RGBA(1., 0.0, 0.0, 0.2)
 end
 
-function AutoViz.render!(rendermodel::RenderModel, overlay::PretictionOverlay, scene::Scene, roadway::R) where R
+function AutoViz.render!(rendermodel::RenderModel, overlay::PredictionOverlay, scene::Scene, roadway::R) where R
 
     predictions = overlay.prediction
     ego = scene[findfirst(1, scene)]
@@ -17,10 +17,10 @@ function AutoViz.render!(rendermodel::RenderModel, overlay::PretictionOverlay, s
 end
 
 
-function animate_record(rec::SceneRecord,dt::Float64, env::CrosswalkEnv, ego_vehicle::Vector{Vehicle}, sensor::GaussianSensor, sensor_o::Vector{Vector{Vehicle}}, 
+function animate_record(scenes::Vector{Scene},dt::Float64, env::CrosswalkEnv, ego_vehicle::Vector{Vehicle}, sensor::GaussianSensor, sensor_o::Vector{Vector{Vehicle}}, 
                              risk::Vector{Float64}, ttc::Vector{Float64}, collision_rate::Vector{Float64}, brake_request::Vector{Bool}, prediction::Vector{Array{Float64}}, cam=FitToContentCamera(0.0))
      
-    duration =rec.nframes*dt::Float64
+    duration = length(scenes)*dt::Float64
     fps = Int(1/dt)
 
     function render_rec(t, dt)
@@ -31,9 +31,9 @@ function animate_record(rec::SceneRecord,dt::Float64, env::CrosswalkEnv, ego_veh
        
         sensor_overlay = GaussianSensorOverlay(sensor=sensor, o=sensor_o[frame_index])
         occlusion_overlay = OcclusionOverlay(obstacles=env.obstacles)
-        prediction_overlay = PretictionOverlay(prediction=prediction[frame_index])
+        prediction_overlay = PredictionOverlay(prediction=prediction[frame_index])
         text_overlay = TextOverlay(text=text_to_visualize,pos=VecE2(75.,8.),incameraframe=true,color=colorant"white",font_size=20)
-        return render(rec[frame_index-nframes(rec)], env, [prediction_overlay, sensor_overlay, occlusion_overlay, text_overlay, IDOverlay()], cam=cam)
+        return render(scenes[frame_index], env, [prediction_overlay, sensor_overlay, occlusion_overlay, text_overlay, IDOverlay()], cam=cam)
 
     end
     return duration, fps, render_rec
@@ -57,15 +57,16 @@ end
 
 function AutomotiveDrivingModels.run_callback(
         callback::ObservationCallback,
-        rec::EntityQueueRecord{S,D,I},
+        scenes::Vector{Scene},
+        actions::Union{Nothing, Vector{Frame{A}}},
         roadway::R,
         models::Dict{I,M},
-        tick::Int) where {S,D,I,R,M<:DriverModel}
+        tick::Int) where {A<:EntityAction,I,R,M<:DriverModel}
 
     push!(callback.sensor_observations, models[1].sensor_observations)
     push!(callback.ego_vehicle, models[1].ego_vehicle)
     push!(callback.ego_a, models[1].a_current)
-    collision = is_crash(rec[0])
+    collision = is_crash(scenes[tick])
     push!(callback.collision, collision)
 
     push!(callback.collision_rate, models[1].collision_rate)

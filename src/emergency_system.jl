@@ -170,9 +170,7 @@ function AutomotiveDrivingModels.get_name(model::EmergencySystem)
     return "Emergency Braking System"
 end
 
-AutomotiveDrivingModels.rand(model::EmergencySystem) = model.a
-
-
+Base.rand(rng::AbstractRNG, model::EmergencySystem) = model.a
 
 """
     is_crash(scene::Scene)
@@ -180,14 +178,13 @@ return true if the ego car is in collision in the given scene, do not check for 
 other participants
 """
 function is_crash(scene::Scene)
-    ego = scene[findfirst(1, scene)]
-    @assert ego.id == 1
+    ego = get_by_id(scene, EGO_ID)
     if ego.state.v ≈ 0
         return false
     end
     for veh in scene
-        if veh.id != 1
-            if AutomotivePOMDPs.is_colliding(ego, veh)
+        if veh.id != EGO_ID
+            if collision_checker(ego, veh)
                 return true
             end
         end

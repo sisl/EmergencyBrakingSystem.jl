@@ -74,7 +74,7 @@ function evaluate_scenario(ego_x, ego_y, ego_v, ped_x, ped_y, ped_v, ped_theta, 
     env = CrosswalkEnv(params);
 
 
-    ego_id = 1
+    ego_id = EGO_ID
     ped_id = 2
     ped2_id = 3
     ped3_id = 4
@@ -122,8 +122,6 @@ function evaluate_scenario(ego_x, ego_y, ego_v, ped_x, ped_y, ped_v, ped_theta, 
     models[ped3_id] = ConstantPedestrian(v_desired=1.0, dawdling_amp=0.05) # dumb model
 
     nticks = 100
-    rec = SceneRecord(nticks+1, timestep)
-
     sensor_observations = [Vehicle[]]
     ego_vehicle = Vehicle[]
     ego_a = Float64[]
@@ -138,9 +136,9 @@ function evaluate_scenario(ego_x, ego_y, ego_v, ped_x, ped_y, ped_v, ped_theta, 
 
     obs_callback = (EmergencyBrakingSystem.ObservationCallback(sensor_observations, ego_vehicle, ego_a, collision, collision_rate, ttc, risk, emergency_brake_request, prediction_obstacle),)
 
-    simulate!(rec, scene, env.roadway, models, nticks, obs_callback)
+    scenes = simulate(scene, env.roadway, models, nticks, timestep, callbacks=obs_callback)
 
-    return (rec, timestep, env, sensor, sensor_observations, ego_vehicle, ego_a, collision, collision_rate, ttc, risk, emergency_brake_request, prediction_obstacle)
+    return (scenes, timestep, env, sensor, sensor_observations, ego_vehicle, ego_a, collision, collision_rate, ttc, risk, emergency_brake_request, prediction_obstacle)
 
 end
 

@@ -1,6 +1,7 @@
 module EmergencyBrakingSystem
 
 using Random
+using Statistics
 using AutomotiveDrivingModels
 using AutoViz
 using AutomotiveSensors

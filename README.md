@@ -1,5 +1,3 @@
-# detailed documentation follows soon ...
-
 # EmergencyBrakingSystem
 
 [![Build Status](https://travis-ci.org/sisl/EmergencyBrakingSystem.jl.svg?branch=master)](https://travis-ci.org/sisl/EmergencyBrakingSystem.jl)
@@ -20,7 +18,18 @@ A pedestrian corsses the road, but there is no brake intervention required.
 
 ## Installation
 
-To install this package and its dependency run the following in the julia REPL:
+To install this package and its dependency, it is recommended to use julia > 1.1 and add the SISL registry and the JuliaPOMDP registry. 
+You can run the following line in the julia REPL: 
+```julia 
+using Pkg 
+Pkg.add("POMDPs")
+using POMDPs
+POMDPs.add_registry() # add JuliaPOMDP registry 
+Pkg.Registry.add("https://github.com/sisl/Registry") # add sisl registry 
+Pkg.add("https://github.com/sisl/EmergencyBrakingSystem.jl") # install the package and its dependencies
+```
+
+Alternatively, you could add all the dependencies manually (not recommended):
 ```julia
 using Pkg
 Pkg.add(PackageSpec(url="https://github.com/sisl/Vec.jl"))
@@ -34,18 +43,12 @@ Pkg.add(PackageSpec(url="https://github.com/sisl/AutomotivePOMDPs"))
 Pkg.add(PackageSpec(url="https://github.com/sisl/EmergencyBrakingSystem.jl"))
 ```
 
-
-## TODOs
-
-
-
-## Dependencies
-
-- AutomotiveDrivingModels.jl
-- POMDPs.jl
-
 ## Code to run
 
 Run `test.ipynb` for a visualization of the different scenarios.
 
 ## Folder structure
+
+- `src/` 
+- `docs/`
+- `test/`
