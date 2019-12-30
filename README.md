@@ -26,7 +26,7 @@ Pkg.add("POMDPs")
 using POMDPs
 POMDPs.add_registry() # add JuliaPOMDP registry 
 Pkg.Registry.add("https://github.com/sisl/Registry") # add sisl registry 
-Pkg.add("https://github.com/sisl/EmergencyBrakingSystem.jl") # install the package and its dependencies
+Pkg.add("EmergencyBrakingSystem") # install the package and its dependencies
 ```
 
 ## Code to run
