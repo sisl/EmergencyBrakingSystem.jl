@@ -15,7 +15,6 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
 AutomotiveDrivingModels = "0.7.12"
-AutoViz = "0.7"
 AutomotivePOMDPs = "0.2.1"
 
 [extras]
